@@ -33,7 +33,7 @@ build {
     destination = "/tmp/apache.conf"
   }
     provisioner "shell" {
-    inline = ["sudo mv /tmp/apache.conf /etc/apache2/sites-enabled/000-default.conf"]
+    inline = ["sudo mv /tmp/apache.conf /etc/apache2/apache.conf"]
   }
 
 }

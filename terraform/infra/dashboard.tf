@@ -16,7 +16,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           "metrics" : [
             ["AWS/AutoScaling", "GroupInServiceInstances", "AutoScalingGroupName", "${module.asg.autoscaling_group_name}", { "period" : 300, "stat" : "Average" }]
           ],
-          "region" : "us-west-2",
+          "region" : "${local.region}",
           "stacked" : false,
           "timezone" : "UTC",
           "title" : "GroupInServiceInstances: Average",
@@ -33,7 +33,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           "metrics" : [
             ["CWAgent", "disk_used_percent", "AutoScalingGroupName", "${module.asg.autoscaling_group_name}"]
           ],
-          "region" : "us-west-2",
+          "region" : "${local.region}",
           "stacked" : false,
           "view" : "timeSeries"
         }
@@ -48,7 +48,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           "metrics" : [
             ["CWAgent", "mem_used_percent", "AutoScalingGroupName", "${module.asg.autoscaling_group_name}"]
           ],
-          "region" : "us-west-2",
+          "region" : "${local.region}",
           "stacked" : false,
           "view" : "timeSeries"
         }
@@ -63,7 +63,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           "metrics" : [
             ["CWAgent", "disk_inodes_used", "AutoScalingGroupName", "${module.asg.autoscaling_group_name}"]
           ],
-          "region" : "us-west-2",
+          "region" : "${local.region}",
           "stacked" : false,
           "view" : "timeSeries"
         }
@@ -82,7 +82,7 @@ resource "aws_cloudwatch_dashboard" "main" {
             "position" : "bottom"
           },
           "title" : "HTTPCode_ELB_5XX_Count: Sum",
-          "region" : "us-west-2",
+          "region" : "${local.region}",
           "liveData" : false,
           "timezone" : "UTC",
           "view" : "timeSeries",
