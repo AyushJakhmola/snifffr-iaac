@@ -1,11 +1,11 @@
-terraform {
-  backend "s3" {
-    key            = "terraform.tfstate"
-    bucket         = "snifffr-iaac-state-678109907733"
-    region         = "us-west-2"
-    dynamodb_table = "snifffr-iaac-state-lock-dynamodb-678109907733"
-  }
-}
+#terraform {
+  #backend "s3" {
+   #key            = "terraform.tfstate"
+    #bucket         = "test-snifffr-iaac-state-678109907733"
+    #region         = "us-east-2"
+    #dynamodb_table = "test-snifffr-iaac-state-lock-dynamodb-678109907733"
+  #}
+#}
 
 provider "aws" {
   region = local.region

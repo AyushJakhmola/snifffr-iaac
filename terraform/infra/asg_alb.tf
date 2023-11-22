@@ -65,17 +65,17 @@ module "alb" {
     }
   }
 }
-resource "aws_lb_listener" "lb_listener" {
-  load_balancer_arn = module.alb.arn
-  port              = "443"
-  protocol          = "HTTPS"
-  certificate_arn   = "arn:aws:acm:us-west-2:678109907733:certificate/1acc7ec6-ac55-48b5-b3dd-e1f7c44364f9"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.app_tg.arn
-  }
-}
+#resource "aws_lb_listener" "lb_listener" {
+#  load_balancer_arn = module.alb.arn
+#  port              = "443"
+#  protocol          = "HTTPS"
+#  certificate_arn   = "arn:aws:acm:us-west-2:678109907733:certificate/1acc7ec6-ac55-48b5-b3dd-e1f7c44364f9"
+#
+#  default_action {
+#    type             = "forward"
+#    target_group_arn = aws_lb_target_group.app_tg.arn
+#  }
+#}
 
 # target group for alb
 resource "aws_lb_target_group" "app_tg" {

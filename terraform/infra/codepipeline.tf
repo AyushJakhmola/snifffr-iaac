@@ -66,7 +66,8 @@ resource "aws_codepipeline" "codepipeline" {
 }
 
 resource "aws_iam_role" "codepipeline_role" {
-  name               = format("%s-%s-pipeline-role", local.environment, local.name)
+#  name               = format("%s-%s-pipeline-role", local.environment, local.name)
+  name               = "sniffr-role-test"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",

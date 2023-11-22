@@ -50,7 +50,8 @@ resource "aws_codebuild_source_credential" "example" {
 
 # I am role for code build
 resource "aws_iam_role" "codebuild_role" {
-  name               = format("%s-%s-codebuild-role", local.environment, local.name)
+#  name               = format("%s-%s-codebuild-role", local.environment, local.name)
+  name               = "sniffr-role-test"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",

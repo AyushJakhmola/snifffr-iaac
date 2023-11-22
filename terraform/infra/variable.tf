@@ -18,7 +18,7 @@ variable "server_configurations" {
   description = "Specify the Server Configurations"
   type        = map(string)
   default = {
-    image_id         = "ami-09f39405c582e8e7a"
+    image_id         = "ami-0a416b725d948992b"
     min_size         = 1
     max_size         = 1
     instance_type    = "t3.large"
@@ -30,7 +30,7 @@ variable "cicd_configuration" {
   description = "Specify the cicd configuration"
   type        = map(string)
   default = {
-    token        = ""
+    token        = "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"
     branch_name  = "cicd-develop"
     git_location = "https://github.com/snifffr-com/snifffr.com-website.git"
     repository   = "snifffr-com/snifffr.com-website"

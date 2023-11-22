@@ -1,7 +1,7 @@
 module "backend" {
   source                       = "squareops/tfstate/aws"
   logging                      = false
-  bucket_name                  = "snifffr-iaac-state" 
+  bucket_name                  = "test-snifffr-iaac-state" 
   environment                  = local.environment
   force_destroy                = true
   versioning_enabled           = false

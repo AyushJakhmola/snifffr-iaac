@@ -1,6 +1,6 @@
 locals {
   name        = "snifffr"
-  region      = "us-east-1"
+  region      = "us-east-2"
   environment = "dev"
   additional_tags = {
     Owner           = "snifffr"
