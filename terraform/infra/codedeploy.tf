@@ -5,9 +5,16 @@ resource "aws_codedeploy_app" "app" {
 
 resource "aws_codedeploy_deployment_group" "app_deploy_group" {
   app_name              = resource.aws_codedeploy_app.app.name
-  deployment_group_name = aws_codedeploy_app.app.name
+  deployment_group_name = format("%s-%s-app-group", local.environment, local.name)
   service_role_arn      = resource.aws_iam_role.codedeploy_role.arn
   autoscaling_groups    = [module.asg.autoscaling_group_name]
+}
+
+resource "aws_codedeploy_deployment_group" "back_app_deploy_group" {
+  app_name              = resource.aws_codedeploy_app.app.name
+  deployment_group_name = format("%s-%s-back-group", local.environment, local.name)
+  service_role_arn      = resource.aws_iam_role.codedeploy_role.arn
+  autoscaling_groups    = [module.back_asg.autoscaling_group_name]
 }
 
 resource "aws_iam_role" "codedeploy_role" {

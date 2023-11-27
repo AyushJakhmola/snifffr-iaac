@@ -63,6 +63,23 @@ resource "aws_codepipeline" "codepipeline" {
       }
     }
   }
+
+  stage {
+    name = "Backend_Deploy"
+    action {
+      name            = "Deploy"
+      category        = "Deploy"
+      owner           = "AWS"
+      provider        = "CodeDeploy"
+      input_artifacts = ["build_output"]
+      version         = "1"
+
+      configuration = {
+        ApplicationName     = resource.aws_codedeploy_app.app.name
+        DeploymentGroupName = resource.aws_codedeploy_deployment_group.back_app_deploy_group.deployment_group_name
+      }
+    }
+  }
 }
 
 resource "aws_iam_role" "codepipeline_role" {

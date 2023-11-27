@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
-    key            = "terraform.tfstate"
-    bucket         = "snifffr-iaac-state-678109907733"
-    region         = "us-west-2"
-    dynamodb_table = "snifffr-iaac-state-lock-dynamodb-678109907733"
+    key            = "stg/terraform.tfstate"
+    bucket         = "stg-snifffr-iaac-state-678109907733"
+    region         = "us-east-1"
+    dynamodb_table = "stg-snifffr-iaac-state-lock-dynamodb-678109907733"
   }
 }
 

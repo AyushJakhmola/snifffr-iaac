@@ -93,3 +93,7 @@ resource "aws_cloudwatch_dashboard" "main" {
   })
 }
 
+
+# CPU 
+# Network 
+# 

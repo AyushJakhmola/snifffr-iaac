@@ -13,8 +13,9 @@ module "s3_bucket" {
 # Code Build Project
 resource "aws_codebuild_project" "build_application" {
   name           = format("%s-%s-codebuild", local.environment, local.name)
-  build_timeout  = "5"
+  depends_on     = [aws_iam_role.codebuild_role]
   service_role   = aws_iam_role.codebuild_role.arn
+  build_timeout  = "300"
   source_version = var.cicd_configuration.branch_name
   artifacts {
     type     = "S3"
@@ -22,17 +23,18 @@ resource "aws_codebuild_project" "build_application" {
   }
 
   environment {
-    compute_type                = "BUILD_GENERAL1_SMALL"
     image                       = "aws/codebuild/standard:5.0"
     type                        = "LINUX_CONTAINER"
-    image_pull_credentials_type = "CODEBUILD"
+    compute_type                = "BUILD_GENERAL1_SMALL"
     privileged_mode             = true
+    image_pull_credentials_type = "CODEBUILD"
   }
 
   source {
     type            = "GITHUB"
     location        = var.cicd_configuration.git_location
     git_clone_depth = 1
+    buildspec       = data.local_file.local.content
   }
 
   logs_config {
@@ -43,14 +45,18 @@ resource "aws_codebuild_project" "build_application" {
 }
 
 resource "aws_codebuild_source_credential" "example" {
+  token       = var.cicd_configuration.token
   auth_type   = "PERSONAL_ACCESS_TOKEN"
   server_type = "GITHUB"
-  token       = var.cicd_configuration.token
+}
+
+data "local_file" "local" {
+  filename = "${path.module}/buildspec.yaml"
 }
 
 # I am role for code build
 resource "aws_iam_role" "codebuild_role" {
-  name               = format("%s-%s-codebuild-role", local.environment, local.name)
+  name               = format("%s-%s-app-codebuild-role", local.environment, local.name)
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",

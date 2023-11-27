@@ -1,0 +1,15 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - apt -y update
+      - apt -y install jq awscli
+  build:
+    on-failure: ABORT
+    commands:
+    # Secret Manager
+      - echo Get Environment variables from AWS SECRETS MANAGER
+      - aws secretsmanager get-secret-value --secret-id /dev/wp-config.php | jq -r .SecretString > wp-config.php
+artifacts:
+   files:
+      - '**/*'

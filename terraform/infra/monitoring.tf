@@ -4,7 +4,7 @@ resource "aws_sns_topic" "sns_topic" {
 
 resource "aws_sns_topic_subscription" "subscription" {
   protocol   = "email"
-  endpoint   = "rachit.maheshwari@squareops.com"
+  endpoint   = "anish@squareops.com"
   topic_arn  = aws_sns_topic.sns_topic.arn
   depends_on = [aws_sns_topic.sns_topic]
 }

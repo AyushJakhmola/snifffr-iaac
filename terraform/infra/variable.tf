@@ -4,24 +4,47 @@ variable "vpc_cidr" {
   default     = "10.10.0.0/16"
 }
 
+variable "acm" {
+  description = "AWS ACN certificate arn"
+  type        = string
+  default     = "arn:aws:acm:us-east-1:678109907733:certificate/d2c59a76-5a2f-436a-a754-2bd8015ae04d"
+}
+
 variable "health_check_parameters" {
   description = "Health check attributes for the application"
   type        = map(string)
   default = {
-    port     = 443
-    path     = "/healthlocal"
-    protocol = "HTTPS"
+    port         = 443
+    path         = "/"
+    protocol     = "HTTPS"
+    success_code = "200-399"
   }
 }
 
-variable "server_configurations" {
+variable "app_server_configuration" {
   description = "Specify the Server Configurations"
   type        = map(string)
   default = {
-    image_id         = "ami-09f39405c582e8e7a"
+    image_id         = "ami-0119c30c8af3d7a18"
     min_size         = 1
     max_size         = 1
-    instance_type    = "t3.large"
+    volume_size      = 20
+    volume_type      = "gp3"
+    instance_type    = "t3.medium"
+    desired_capacity = 1
+  }
+}
+
+variable "bakend_server_configurations" {
+  description = "Specify the Server Configurations"
+  type        = map(string)
+  default = {
+    image_id         = "ami-0ea824ce2e1c208ab"
+    min_size         = 1
+    max_size         = 1
+    volume_size      = 20
+    volume_type      = "gp3"
+    instance_type    = "t3.medium"
     desired_capacity = 1
   }
 }
@@ -30,7 +53,7 @@ variable "cicd_configuration" {
   description = "Specify the cicd configuration"
   type        = map(string)
   default = {
-    token        = ""
+    token        = "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"
     branch_name  = "cicd-develop"
     git_location = "https://github.com/snifffr-com/snifffr.com-website.git"
     repository   = "snifffr-com/snifffr.com-website"
@@ -44,6 +67,10 @@ variable "database_configuration" {
     engine              = "aurora-mysql"
     engine_version      = "5.7.mysql_aurora.2.11.2"
     instance_class      = "db.t3.medium"
-    snapshot_identifier = "rds:dev-rds-temp-sniff-cluster-2023-10-30-08-12"
+    snapshot_identifier = "dev-rds-changed"
   }
 }
+
+# create HA
+
+ 
