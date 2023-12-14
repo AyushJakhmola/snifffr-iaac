@@ -104,21 +104,21 @@ resource "aws_cloudwatch_dashboard" "main" {
           "region" : "${local.region}"
         }
       },
-        {
-            "type": "metric",
-            "x": 12,
-            "y": 6,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "view": "timeSeries",
-                "stacked": false,
-                "metrics": [
-                    [ "AWS/ApplicationELB", "RequestCount", "LoadBalancer", "${module.alb.arn_suffix}" ]
-                ],
-                "region": "${local.region}"
-            }
-        },
+      {
+        "type" : "metric",
+        "x" : 12,
+        "y" : 6,
+        "width" : 6,
+        "height" : 6,
+        "properties" : {
+          "view" : "timeSeries",
+          "stacked" : false,
+          "metrics" : [
+            ["AWS/ApplicationELB", "RequestCount", "LoadBalancer", "${module.alb.id}"]
+          ],
+          "region" : "${local.region}"
+        }
+      },
       {
         "type" : "metric",
         "x" : 18,
@@ -129,7 +129,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           "view" : "singleValue",
           "stacked" : false,
           "metrics" : [
-            ["AWS/ApplicationELB", "HealthyHostCount", "TargetGroup", "${aws_lb_target_group.app_tg.arn_suffix}", "LoadBalancer", "${module.alb.arn_suffix}", { "region" : "${local.region}" }]
+            ["AWS/ApplicationELB", "HealthyHostCount", "TargetGroup", "${module.asg.autoscaling_group_name}", "LoadBalancer", "${module.alb.id}", { "region" : "${local.region}" }]
           ],
           "region" : "${local.region}",
           "period" : 300
@@ -219,54 +219,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           "period" : 300,
           "stat" : "Average"
         }
-      },
-      {
-            "type": "metric",
-            "x": 0,
-            "y": 18,
-            "width": 6,
-            "height": 5,
-            "properties": {
-                "view": "singleValue",
-                "stacked": false,
-                "metrics": [
-                    [ "AWS/EFS", "StorageBytes", "StorageClass", "Total", "FileSystemId", "${module.efs.id}" ]
-                ],
-                "region": "${local.region}"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 6,
-            "y": 18,
-            "width": 6,
-            "height": 4,
-            "properties": {
-                "view": "singleValue",
-                "stacked": false,
-                "metrics": [
-                    [ "AWS/EFS", "ClientConnections", "FileSystemId", "${module.efs.id}" ]
-                ],
-                "region": "${local.region}"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 12,
-            "y": 12,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "view": "timeSeries",
-                "stacked": false,
-                "metrics": [
-                    [ "AWS/EFS", "PermittedThroughput", "FileSystemId", "${module.efs.id}" ],
-                    [ ".", "PercentIOLimit", ".", "." ],
-                    [ ".", "TotalIOBytes", ".", "." ]
-                ],
-                "region": "${local.region}"
-            }
-        }
+      }
     ]
   })
 }

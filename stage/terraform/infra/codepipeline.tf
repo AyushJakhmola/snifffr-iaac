@@ -25,7 +25,7 @@ resource "aws_codepipeline" "codepipeline" {
       configuration = {
         ConnectionArn    = aws_codestarconnections_connection.connect.arn
         FullRepositoryId = var.cicd_configuration.repository
-        BranchName       = var.cicd_configuration.branch_name
+        BranchName       = "cicd-develop"
       }
     }
   }

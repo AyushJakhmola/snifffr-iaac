@@ -147,17 +147,17 @@ module "asg" {
   health_check_type   = "EC2"
   vpc_zone_identifier = module.vpc.public_subnets
 
-  # scaling_policies = {
-  #   cpu_utilization_policy = {
-  #     policy_type = "TargetTrackingScaling"
-  #     target_tracking_configuration = {
-  #       predefined_metric_specification = {
-  #         predefined_metric_type = "ASGAverageCPUUtilization"
-  #       }
-  #       target_value = 70.0
-  #     }
-  #   } 
-  # }
+  scaling_policies = {
+    cpu_utilization_policy = {
+      policy_type = "TargetTrackingScaling"
+      target_tracking_configuration = {
+        predefined_metric_specification = {
+          predefined_metric_type = "ASGAverageCPUUtilization"
+        }
+        target_value = 70.0
+      }
+    }
+  }
 
   # Launch template
   image_id               = var.app_server_configuration.image_id
@@ -177,7 +177,6 @@ module "asg" {
     SecretsManagerReadWrite      = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
     AmazonRDSReadOnlyAccess      = "arn:aws:iam::aws:policy/AmazonRDSReadOnlyAccess"
     CloudWatchAgentAdminPolicy   = "arn:aws:iam::aws:policy/CloudWatchAgentAdminPolicy"
-    AmazonElastiCacheFullAccess  = "arn:aws:iam::aws:policy/AmazonElastiCacheFullAccess"
     CloudWatchAgentServerPolicy  = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
     AmazonElastiCacheFullAccess  = "arn:aws:iam::aws:policy/AmazonElastiCacheFullAccess"
     AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
@@ -221,16 +220,6 @@ module "asg" {
     }
   ]
   tags = local.additional_tags
-}
-
-resource "aws_autoscaling_policy" "cpu" {
-  name                   = format("%s-%s-cpu-scaling", local.environment, local.name)
-  cooldown               = "300"
-  depends_on             = [module.asg]
-  policy_type            = "SimpleScaling"
-  adjustment_type        = "ChangeInCapacity"
-  scaling_adjustment     = "1"
-  autoscaling_group_name = module.asg.autoscaling_group_name
 }
 
 resource "aws_autoscaling_policy" "mem" {

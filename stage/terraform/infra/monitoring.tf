@@ -13,10 +13,10 @@ resource "aws_cloudwatch_metric_alarm" "cpu_alarm" {
   period                    = 120
   namespace                 = "AWS/EC2"
   statistic                 = "Average"
-  threshold                 = 70
+  threshold                 = 80
   alarm_name                = format("%s-%s-cpu-alarm", local.environment, local.name)
   metric_name               = "CPUUtilization"
-  alarm_actions             = ["${aws_sns_topic.sns_topic.arn}", aws_autoscaling_policy.cpu.arn]
+  alarm_actions             = ["${aws_sns_topic.sns_topic.arn}"]
   alarm_description         = "This metric monitors ec2 cpu utilization"
   evaluation_periods        = 2
   comparison_operator       = "GreaterThanOrEqualToThreshold"
@@ -51,7 +51,7 @@ resource "aws_cloudwatch_metric_alarm" "disk" {
   threshold                 = 50
   alarm_name                = format("%s-%s-asg-ec2-disk", local.environment, local.name)
   metric_name               = "disk_used_percent"
-  alarm_actions             = ["${aws_sns_topic.sns_topic.arn}", aws_autoscaling_policy.disk.arn]
+  alarm_actions             = ["${aws_sns_topic.sns_topic.arn}", aws_autoscaling_policy.mem.arn]
   actions_enabled           = true
   alarm_description         = "This metric monitors disk of ec2"
   evaluation_periods        = 2
@@ -69,11 +69,11 @@ resource "aws_cloudwatch_metric_alarm" "ec2_health" {
   threshold                 = 1
   alarm_name                = format("%s-%s-asg-ec2-health", local.environment, local.name)
   metric_name               = "GroupTotalInstances"
-  alarm_actions             = ["${aws_sns_topic.sns_topic.arn}"]
+  alarm_actions             = ["${aws_sns_topic.sns_topic.arn}", aws_autoscaling_policy.mem.arn]
   actions_enabled           = true
   alarm_description         = "This metric monitors healthy ec2"
   evaluation_periods        = 2
-  comparison_operator       = "LessThanThreshold"
+  comparison_operator       = "LessThanOrEqualToThreshold"
   insufficient_data_actions = []
   dimensions = {
     AutoScalingGroupName = module.asg.autoscaling_group_name

@@ -1,0 +1,11 @@
+0 9 * * * rm -rf /usr/local/server-scripts/cleanup-log.txt
+1 9 * * * rm -rf /usr/local/server-scripts/buddypress-cleanup-log.txt
+2 9 * * * rm -rf /usr/local/server-scripts/buddypress_coverimage_cleanup-log.txt
+3 9 * * * rm -rf /usr/local/server-scripts/arrow_mgs_cleanup_log.txt
+
+* * * * * solo.pl -port=14300 /usr/local/server-scripts/cleanup.sh >> /usr/local/server-scripts/cleanup-log.txt
+* * * * * solo.pl -port=14301 /usr/local/server-scripts/buddypress_cleanup.sh >> /usr/local/server-scripts/buddypress-cleanup-log.txt
+* * * * * solo.pl -port=14302 /usr/local/server-scripts/buddypress_coverimage_cleanup.sh >> /usr/local/server-scripts/buddypress_coverimage_cleanup-log.txt
+* * * * * solo.pl -port=14303 /usr/local/server-scripts/arrowchat_msg_cleanup.sh >> /usr/local/server-scripts/arrow_mgs_cleanup_log.txt
+
+0 * * * * wget -q -O – https://snifffr.com/wp-cron.php?doing_wp_cron >/dev/null 2>&1

@@ -9,11 +9,11 @@ packer {
 
 source "amazon-ebs" "basic-ami" {
   ami_name             = "snifffr-app-packer-{{timestamp}}"
-  instance_type        = "t3.medium"
+  instance_type        = var.Server_cofig.instance_type
   ssh_interface         = "public_ip"
   ssh_username         = "ubuntu"
-  source_ami           = "ami-06aa3f7caf3a30282"
-  region               = "us-east-1"
+  source_ami           = var.Server_cofig.source_ami
+  region               = var.region
   # ssh_agent_auth       = true
   # ssh_keypair_name     = "sniff-2022.pem"
   # ssh_private_key_file = "/home/ubuntu/sniff-2022.pem"
@@ -29,13 +29,12 @@ build {
   }
 
   provisioner "file" {
-    source      = "apache.conf"
-    destination = "/tmp/apache.conf"
+    source      = "www.conf"
+    destination = "/tmp/www.conf"
   }
     provisioner "shell" {
-    inline = ["sudo mv /tmp/apache.conf /etc/apache2/sites-enabled/000-default.conf"]
+    inline = ["sudo mv /tmp/www.conf /etc/php/7.4/fpm/pool.d/www.conf"]
   }
-
 }
 
 # apache configuration 

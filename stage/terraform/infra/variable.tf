@@ -25,9 +25,9 @@ variable "app_server_configuration" {
   description = "Specify the Server Configurations"
   type        = map(string)
   default = {
-    image_id         = "ami-04ea2888edd826dcb"
+    image_id         = "ami-0a01631a8e9ee6205"
     min_size         = 1
-    max_size         = 5
+    max_size         = 1
     volume_size      = 20
     volume_type      = "gp3"
     instance_type    = "t3.medium"
@@ -54,7 +54,7 @@ variable "cicd_configuration" {
   type        = map(string)
   default = {
     token        = "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"
-    branch_name  = "stg"
+    branch_name  = "develop"
     git_location = "https://github.com/snifffr-com/snifffr.com-website.git"
     repository   = "snifffr-com/snifffr.com-website"
   }
@@ -93,5 +93,6 @@ variable "cache_config" {
 #   type = list(string)
 #   default = ["/members/*","/arrowchat/*","/wp-content/*"]
 # }
+# create HA
 
  

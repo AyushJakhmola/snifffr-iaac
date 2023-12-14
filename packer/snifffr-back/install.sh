@@ -19,7 +19,6 @@ sudo apt install libapache2-mod-fcgid -y
 sudo apt install mysql-client -y
 sudo apt install certbot -y
 sudo apt install unzip -y
-sudo apt install nfs-common -y
 sudo apt install lsb-release wget apt-transport-https ca-certificates gnupg -y
 echo "Dependenices installed successfully."
 
@@ -49,23 +48,22 @@ echo "Proxysql server installed successfully."
 
 
 # install objective FS
-# sudo wget https://objectivefs.com/user/download/al6v562ir/objectivefs_7.1_amd64.deb
-# sudo dpkg -i objectivefs_7.1_amd64.deb
-# echo "ObjectiveFS installed successfully."
+sudo wget https://objectivefs.com/user/download/al6v562ir/objectivefs_7.1_amd64.deb
+sudo dpkg -i objectivefs_7.1_amd64.deb
+echo "ObjectiveFS installed successfully."
 
 # objective FS configuration
-# sudo mkdir /content
-# certificate configuration
+sudo mkdir /content
 
-# dir variablise Certificartes 
-sudo mkdir /etc/letsencrypt/live/
-sudo mkdir /etc/letsencrypt/live/stg.snifffr.com
-sudo touch /etc/letsencrypt/live/stg.snifffr.com/cert.pem
-sudo touch /etc/letsencrypt/live/stg.snifffr.com/chain.pem
-sudo touch /etc/letsencrypt/live/stg.snifffr.com/fullchain.pem
-sudo touch /etc/letsencrypt/live/stg.snifffr.com/privkey.pem
-ls -al /etc/letsencrypt/live
-ls -al /etc/letsencrypt/live/stg.snifffr.com/
+# certificate configuration
+# sudo mkdir /etc/letsencrypt/live/
+# sudo mkdir /etc/letsencrypt/live/stg.snifffr.com
+# sudo touch /etc/letsencrypt/live/stg.snifffr.com/cert.pem
+# sudo touch /etc/letsencrypt/live/stg.snifffr.com/chain.pem
+# sudo touch /etc/letsencrypt/live/stg.snifffr.com/fullchain.pem
+# sudo touch /etc/letsencrypt/live/stg.snifffr.com/privkey.pem
+# ls -al /etc/letsencrypt/live
+# ls -al /etc/letsencrypt/live/stg.snifffr.com/
 
 sudo a2dismod php7.4
 sudo a2dismod mpm_worker
@@ -76,8 +74,6 @@ sudo a2enmod access_compat actions alias auth_basic authn_core authn_file authz_
 sudo systemctl restart apache2
 apachectl -M
 
-sudo mkdir ~/efs-mount-point 
-    
+sudo mkdir /usr/local/server-scripts/
+
 echo "script executed successfully"
-
-

@@ -19,7 +19,6 @@ sudo apt install libapache2-mod-fcgid -y
 sudo apt install mysql-client -y
 sudo apt install certbot -y
 sudo apt install unzip -y
-sudo apt install nfs-common -y
 sudo apt install lsb-release wget apt-transport-https ca-certificates gnupg -y
 echo "Dependenices installed successfully."
 
@@ -49,12 +48,13 @@ echo "Proxysql server installed successfully."
 
 
 # install objective FS
-# sudo wget https://objectivefs.com/user/download/al6v562ir/objectivefs_7.1_amd64.deb
-# sudo dpkg -i objectivefs_7.1_amd64.deb
-# echo "ObjectiveFS installed successfully."
+sudo wget https://objectivefs.com/user/download/al6v562ir/objectivefs_7.1_amd64.deb
+sudo dpkg -i objectivefs_7.1_amd64.deb
+echo "ObjectiveFS installed successfully."
 
 # objective FS configuration
-# sudo mkdir /content
+sudo mkdir /content
+
 # certificate configuration
 
 # dir variablise Certificartes 
@@ -75,9 +75,5 @@ sudo a2enmod access_compat actions alias auth_basic authn_core authn_file authz_
 
 sudo systemctl restart apache2
 apachectl -M
-
-sudo mkdir ~/efs-mount-point 
     
 echo "script executed successfully"
-
-
