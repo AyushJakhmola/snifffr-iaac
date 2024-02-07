@@ -47,13 +47,13 @@ echo "Proxysql server installed successfully."
 
 # certificate configuration
 sudo mkdir /etc/letsencrypt/live/
-sudo mkdir /etc/letsencrypt/live/stg.snifffr.com
-sudo touch /etc/letsencrypt/live/stg.snifffr.com/cert.pem
-sudo touch /etc/letsencrypt/live/stg.snifffr.com/chain.pem
-sudo touch /etc/letsencrypt/live/stg.snifffr.com/fullchain.pem
-sudo touch /etc/letsencrypt/live/stg.snifffr.com/privkey.pem
+sudo mkdir /etc/letsencrypt/live/dev.snifffr.com
+sudo touch /etc/letsencrypt/live/dev.snifffr.com/cert.pem
+sudo touch /etc/letsencrypt/live/dev.snifffr.com/chain.pem
+sudo touch /etc/letsencrypt/live/dev.snifffr.com/fullchain.pem
+sudo touch /etc/letsencrypt/live/dev.snifffr.com/privkey.pem
 ls -al /etc/letsencrypt/live
-ls -al /etc/letsencrypt/live/stg.snifffr.com/
+ls -al /etc/letsencrypt/live/dev.snifffr.com/
 
 sudo a2dismod php7.4
 sudo a2dismod mpm_worker
@@ -66,10 +66,8 @@ apachectl -M
 
 sudo mkdir /root/efs-mount-point  
 sudo mkdir /var/log/proxysql
-sudo mkdir /var/cache/opcache
 sudo touch /var/log/proxysql/proxysql.log 
 sudo chmod 777 -R /var/log/proxysql/
-sudo chmod 777 -R /var/cache/opcache
 sudo ulimit -n 102400
 sudo ulimit -c 1073741824
 

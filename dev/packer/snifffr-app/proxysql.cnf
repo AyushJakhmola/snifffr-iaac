@@ -1,0 +1,433 @@
+datadir="/var/lib/proxysql"
+#errorlog="/var/lib/proxysql/proxysql.log"
+errorlog="/var/log/proxysql/proxysql.log"
+
+admin_variables=
+{
+        admin_credentials="admin:admin"
+        #admin_credentials="admin:6SPaEpEwDg"
+        mysql_ifaces="0.0.0.0:6032"
+#       debug=true
+}
+
+mysql_variables=
+{
+        threads=8
+        max_connections=2048
+        default_query_delay=0
+        default_query_timeout=36000000
+        have_compress=true
+        poll_timeout=2000
+        interfaces="0.0.0.0:3306"
+        default_schema="information_schema"
+        stacksize=1048576
+   server_version="5.7.12"
+        #server_version="8.0.20"
+        connect_timeout_server=3000
+# make sure to configure monitor username and password
+# https://github.com/sysown/proxysql/wiki/Global-variables#mysql-monitor_username-mysql-monitor_password
+        monitor_username="monitor"
+        monitor_password="monitorpassword"
+        monitor_history=600000
+        monitor_connect_interval=60000
+        monitor_ping_interval=10000
+        monitor_read_only_interval=1500
+        monitor_read_only_timeout=500
+        ping_interval_server_msec=120000
+        ping_timeout_server=500
+        commands_stats=true
+        sessions_sort=true
+        connect_retries_on_failure=10
+        query_cache_size_MB=4048
+}
+
+
+# defines all the MySQL servers
+mysql_servers =
+(
+        { address="dev-snifffr-db.cluster-c15ybkr6igni.us-east-1.rds.amazonaws.com", port=3306, hostgroup=0, max_connections=100 },
+        { address="dev-snifffr-db.cluster-c15ybkr6igni.us-east-1.rds.amazonaws.com", port=3306, hostgroup=1, max_connections=100 },
+        { address="dev-snifffr-db.cluster-c15ybkr6igni.us-east-1.rds.amazonaws.com", port=3306, hostgroup=3, max_connections=100 }
+)
+
+# defines all the MySQL users
+mysql_users:
+(
+        {
+                username = "enjpmgakfz" # no default , required
+                password = "6SPaEpEwDg" # default: ''
+                #default_hostgroup = 20 # default: 0
+                default_schema = "enjpmgakfz"
+                active = 1            # default: 1
+        }
+)
+
+
+
+#defines MySQL Query Rules
+mysql_query_rules =
+(
+   {
+      rule_id=100
+      active=1
+      match_pattern="^SELECT .* FOR UPDATE"
+      destination_hostgroup=1
+      apply=1
+   },
+   {
+      rule_id=101
+      active=1
+      match_pattern="^SELECT .* FROM WP_OPTIONS .*"
+      #digest="0x8D6AE80711B33F7F" #SELECT option_value FROM wp_options WHERE option_name = ? LIMIT ?
+      destination_hostgroup=3
+      cache_ttl=60000
+      apply=1
+   },
+   {
+      rule_id=102
+      active=1
+      match_pattern="^SELECT .* FROM avatars_refrence_s3 .*"
+      destination_hostgroup=3
+      cache_ttl=300000
+      apply=1
+   },
+   {
+    #Change3
+      rule_id=103
+      active=1
+      match_pattern="^SELECT .* FROM wp_posts WHERE .*"
+     destination_hostgroup=0
+      cache_ttl=60000
+      apply=1
+   },
+   {
+   #Change3
+      rule_id=104
+      active=1
+      match_pattern="SELECT .* FROM wp_postmeta WHERE .*"
+      destination_hostgroup=3
+      cache_ttl=30000
+      apply=1
+   },
+   {
+      rule_id=105
+      active=1
+      match_pattern="SELECT .* FROM wp_wfconfig WHERE .*"
+      destination_hostgroup=3
+      cache_ttl=30000
+      apply=1
+   },
+   {
+   #Change3
+      rule_id=106
+      active=1
+      match_pattern="SELECT .* FROM wp_termmeta WHERE .*"
+      destination_hostgroup=3
+      cache_ttl=30000
+      apply=1
+   },
+   {
+   #Change3
+      rule_id=107
+      active=1
+      match_pattern="^SELECT post_name FROM wp_posts WHERE post_name = .* AND post_type = .* AND ID != .* LIMIT .*"
+      #digest="0x1B1B557DC9CAFDB2"
+      destination_hostgroup=3
+      cache_ttl=10000
+      apply=1
+   },
+     {
+     #Change3
+      rule_id=108
+      active=1
+      match_pattern="^SELECT .* FROM wp_bp_activity WHERE .*"
+      #digest="0x1B1B557DC9CAFDB2"
+      cache_ttl=5000
+      destination_hostgroup=3
+      apply=1
+   },
+     {
+     #Change3
+      rule_id=109
+      active=1
+      match_pattern="^SELECT .* FROM wp_bp_messages_meta WHERE .*"
+      #digest="0x1B1B557DC9CAFDB2"
+      cache_ttl=5000
+      destination_hostgroup=3
+      apply=1
+   },
+     {
+     #Change3
+      rule_id=110
+      active=1
+      match_pattern="^SELECT .* FROM wp_users WHERE .*"
+      #digest="0x1B1B557DC9CAFDB2"
+      destination_hostgroup=3
+      apply=1
+   },
+     {
+     #Change3
+      rule_id=111
+      active=1
+      match_pattern="^SELECT .* FROM wp_bp_xprofile_data WHERE .*"
+      #digest="0x1B1B557DC9CAFDB2"
+      cache_ttl=5000
+      destination_hostgroup=3
+      apply=1
+   },
+     {
+     #Change3
+      rule_id=112
+      active=1
+      match_pattern="^SELECT .* FROM wp_term_relationships WHERE .*"
+      #digest="0x1B1B557DC9CAFDB2"
+      cache_ttl=5000
+      destination_hostgroup=3
+      apply=1
+   },
+     {
+     #Change3
+      rule_id=113
+      active=1
+      #match_pattern="SELECT post_name FROM wp_posts WHERE post_name = ? AND post_type = ? AND ID != ? LIMIT ?"
+      digest="0x1B1B557DC9CAFDB2"
+      cache_ttl=10000
+      destination_hostgroup=3
+      apply=1
+   },
+     {
+     #Change3
+      rule_id=114
+      active=1
+      #match_pattern="SELECT `wp_postmeta`.`post_id`,`wp_postmeta`.`meta_value`,`wp_posts`.`post_type` FROM `wp_posts`,`wp_postmeta` WHERE `wp_posts`.`ID` = `wp_postmeta`.`post_id` AND `wp_postmeta`.`meta_key` = ? AND `wp_postmeta`.`meta_value` != ?"
+      digest="0x3595EAB60FFF529D"
+      cache_ttl=10000
+      destination_hostgroup=3
+      apply=1
+   },
+{
+#Change3
+      rule_id=115
+      active=1
+      #match_pattern="SELECT post_name FROM wp_posts WHERE post_name = ? AND ID != ? LIMIT ?"
+      digest="0x538921F6C3DEBB9E"
+      cache_ttl=10000
+      destination_hostgroup=3
+      apply=1
+   },
+
+{
+      rule_id=116
+      active=1
+      #match_pattern="SELECT tr.object_id FROM wp_term_relationships AS tr INNER JOIN wp_term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id WHERE tt.taxonomy IN (?) AND tt.term_id IN (?) ORDER BY tr.object_id ASC "
+      digest="0xF5F9630BA7BF8660"
+      cache_ttl=30000
+      destination_hostgroup=3
+      apply=1
+   },
+{
+#Change3
+      rule_id=117
+      active=1
+      #match_pattern="SELECT wp_posts.* FROM wp_posts WHERE ?=? AND wp_posts.ID IN (?,?,?,...) AND wp_posts.post_type = ? AND ((wp_posts.post_status = ?)) ORDER BY wp_posts.menu_order ASC "
+      digest="0x2E75EB888DDD304C"
+      cache_ttl=10000
+      destination_hostgroup=3
+      apply=1
+   },
+{
+      rule_id=118
+      active=1
+      #match_pattern="SELECT id FROM wp_bp_activity a WHERE a.type = ? AND a.is_spam = ? AND a.item_id = ? and a.mptt_left > ? AND a.mptt_left <? ORDER BY a.date_recorded ASC"
+      digest="0xF50D6727A16BB19D"
+      cache_ttl=30000
+      destination_hostgroup=3
+      apply=1
+   },
+{
+#Change3
+      rule_id=119
+      active=1
+      #match_pattern="SELECT * FROM wp_posts WHERE ID = ? LIMIT ? "
+      digest="0x923F6A7DFE9A25FC"
+      cache_ttl=10000
+      destination_hostgroup=3
+      apply=1
+   },
+{
+#Change3
+      rule_id=120
+      active=1
+      #match_pattern="SELECT * FROM wp_posts WHERE ID = ? LIMIT ? "
+      digest="0xA1AA7DB43862969E"
+      cache_ttl=10000
+      destination_hostgroup=3
+      apply=1
+   },
+{
+#Change3
+      rule_id=121
+      active=1
+      #match_pattern="SELECT wp_posts.* FROM wp_posts WHERE ?=? AND wp_posts.ID IN (?,?,?,...) AND wp_posts.post_type = ? AND ((wp_posts.post_status = ?)) ORDER BY wp_posts.menu_order,wp_posts.post_date DESC"
+      digest="0x0A0872DCB28A4E65"
+      cache_ttl=10000
+      destination_hostgroup=3
+      apply=1
+   },
+{
+      rule_id=122
+      active=1
+      #match_pattern="SELECT option_value FROM wp_options WHERE option_name = ? LIMIT ? "
+      digest="0x8D6AE80711B33F7F"
+      cache_ttl=60000
+      destination_hostgroup=3
+      apply=1
+   },
+{
+      rule_id=123
+      active=1
+      #match_pattern="SELECT t.*,tt.* FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id WHERE tt.taxonomy IN (?,?,?) ORDER BY t.name ASC "
+      digest="0xC0BDFC1761B0D939"
+      cache_ttl=30000
+      destination_hostgroup=3
+      apply=1
+   },
+{
+      rule_id=124
+      active=1
+      #match_pattern="SELECT t.*,tt.* FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id INNER JOIN wp_term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id WHERE tt.taxonomy IN (?) AND tr.object_id IN (?) ORDER BY t.name ASC"
+      digest="0xFC76938984E0813A"
+      cache_ttl=30000
+      destination_hostgroup=3
+      apply=1
+   },
+   {
+      rule_id=125
+      active=1
+      #match_pattern="SELECT option_name,option_value FROM wp_options WHERE autoload = ?"
+      digest="0x920F6FC2442328B8"
+      destination_hostgroup=3
+      cache_ttl=60000
+      apply=1
+   },
+   {
+      rule_id=126
+      active=1
+      #match_pattern=" SELECT SQL_CALC_FOUND_ROWS wp_posts.ID FROM wp_posts LEFT JOIN wp_term_relationships ON (wp_posts.ID = wp_term_"
+      digest="0x99D9CE3EA4A02D88"
+      destination_hostgroup=3
+      cache_ttl=30000
+      apply=1
+   },
+   {
+      rule_id=127
+      active=1
+      #match_pattern=" SELECT DISTINCT YEAR(post_date) AS year,MONTH(post_date) AS month    FROM wp_posts    WHERE post_type ="
+      digest="0xF47943A98CFD14FB"
+      destination_hostgroup=3
+      cache_ttl=30000
+      apply=1
+   },
+   {
+      rule_id=128
+      active=1
+      #match_pattern="SELECT wp_users.ID userid,wp_users.display_name username,arrowchat_status.session_time lasN"
+      digest="0xB0DEA2E3D797238D"
+      destination_hostgroup=3
+      apply=1
+   },
+   {
+      rule_id=129
+      active=1
+      #match_pattern="SELECT clear_chats    FROM arrowchat_status WHERE userid = ?    "
+      digest="0xFE6D1F31A6FA3E3E"
+      destination_hostgroup=3
+      apply=1
+   },
+   {
+      rule_id=130
+      active=1
+      #match_pattern="SELECT arrowchat.message    FROM arrowchat    WHERE (arrowchat.from = ? AND arrowchat.to = ? "
+      digest="0xA41A7BB9DBB91888"
+      destination_hostgroup=3
+      apply=1
+   },
+   {
+      rule_id=131
+      active=1
+      #match_pattern="SELECT arrowchat.message    FROM arrowchat    WHERE (arrowchat.from = ? AND arrowchat.to = ? "
+      digest="0x11B0D1CBF02522FF"
+      destination_hostgroup=3
+      apply=1
+   },
+   {
+      rule_id=132
+      active=1
+      #match_pattern=" SELECT meta_value    FROM wp_usermeta    WHERE user_id = ?     AND met"
+      digest="0x6B2D9B94A6413EF0"
+      destination_hostgroup=3
+      apply=1
+   },
+   {
+      rule_id=133
+      active=1
+      #match_pattern="SELECT ID FROM wp_users as user     WHERE user.user_status = ? AND user"
+      digest="0x397366AEBBE26B80"
+      destination_hostgroup=3
+      apply=1
+   },
+   {
+      rule_id=134
+      active=1
+      #match_pattern="SSELECT id FROM wp_bpmts_moderation_queue WHERE is_hidden = ? A"
+      digest="0x5E2AA8BD9667E793"
+      destination_hostgroup=3
+      apply=1
+   },
+   {
+      rule_id=135
+      active=1
+      #match_pattern="SELECT theme,status,popout,hash_id,hide_bar,is_admin,play_sound,window_open,chatroom_window,chatroom_"
+      digest="0x7E5105D18C9CCE92"
+      destination_hostgroup=3
+      apply=1
+   },
+   {
+      rule_id=136
+      active=1
+      #match_pattern="SELECT id,user_id,field_id,value,last_updated FROM wp_bp_xprofile_data"
+      digest="0x02BBC7E1BDD2C4A9"
+      destination_hostgroup=3
+      apply=1
+   },
+   {
+      rule_id=200
+      active=1
+      match_pattern="^SELECT .*"
+      destination_hostgroup=3
+      apply=1
+   },
+   {
+      rule_id=300
+      active=1
+      match_pattern=".*"
+      destination_hostgroup=3
+      apply=1
+   }
+)
+
+
+scheduler=
+(
+#  {
+#    id=1
+#    active=0
+#    interval_ms=10000
+#    filename="/var/lib/proxysql/proxysql_galera_checker.sh"
+#    arg1="0"
+#    arg2="0"
+#    arg3="0"
+#    arg4="1"
+#    arg5="/var/lib/proxysql/proxysql_galera_checker.log"
+#  }
+)

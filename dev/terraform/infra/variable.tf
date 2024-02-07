@@ -16,12 +16,8 @@ variable "health_check_parameters" {
   default = {
     port         = 443
     path         = "/"
-    timeout = 5
-    interval = 15
     protocol     = "HTTPS"
-    success_code = "200-399"
-    healthy_threshold = 3
-    unhealthy_threshold = 3
+    success_code = "200-499"
   }
 }
 
@@ -29,23 +25,13 @@ variable "app_server_configuration" {
   description = "Specify the Server Configurations"
   type        = map(string)
   default = {
-    image_id         = "ami-01d3b3d7d338538f1"
-    min_size         = 2
-    max_size         = 2
+    image_id         = "ami-023dae0bd03f0572a"
+    min_size         = 1
+    max_size         = 1
     volume_size      = 20
     volume_type      = "gp3"
-    instance_type    = "c5ad.2xlarge"
-    desired_capacity = 2
-    health_check_grace_period = 120
-  }
-}
-
-variable "app_alb_configuration" {
-  description = "Specify the Server Configurations"
-  type        = map(string)
-  default = {
-    idle_timeout         = 300
-    deregistration_delay = 60
+    instance_type    = "t3.large"
+    desired_capacity = 1
   }
 }
 
@@ -53,7 +39,7 @@ variable "bakend_server_configurations" {
   description = "Specify the Server Configurations"
   type        = map(string)
   default = {
-    image_id         = "ami-051e3c7b758a94f24"
+    image_id         = "ami-0824a90b36a536c72"
     min_size         = 1
     max_size         = 1
     volume_size      = 20
@@ -68,45 +54,44 @@ variable "cicd_configuration" {
   type        = map(string)
   default = {
     token        = "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"
-    branch_name  = "stg"
+    branch_name  = "develop"
     git_location = "https://github.com/snifffr-com/snifffr.com-website.git"
     repository   = "snifffr-com/snifffr.com-website"
   }
 }
 
-variable "database_configuration" { 
+variable "database_configuration" {
   description = "Specify the paraeters for the database"
   type        = map(string)
   default = {
     engine              = "aurora-mysql"
     engine_version      = "5.7.mysql_aurora.2.11.2"
-    instance_class      = "db.r6g.2xlarge"
+    instance_class      = "db.t3.medium"
     snapshot_identifier = "dev-rds-changed"
-    db_cluster_parameter_group_family = "aurora-mysql5.7"
   }
 }
 
-variable "cache_config" { 
+variable "cache_config" {
   description = "Specify the paraeters for the Caching"
   default = {
-    origin_id = "alb"
-    cache_enable_policy = "658327ea-f89d-4fab-a63d-7e88639e58f6"
-    cache_disable_policy = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
-    cached_methods  = ["GET", "HEAD", "OPTIONS"]
-    allowed_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    origin_id              = "alb"
+    cache_enable_policy    = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+    cache_disable_policy   = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"
+    cached_methods         = ["GET", "HEAD", "OPTIONS"]
+    allowed_methods        = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
     viewer_protocol_policy = "https-only"
   }
 }
+# variable "path_pattern" {
+#   description = "Lists the paths to be response"
+#   type = list(string)
+#   default = ["/members/*","/arrowchat/*","/wp-content/*"]
+# }
 
-variable "monitor_config" {
-  description = "Specify the paraeters for the Monitoring"
-  default = {
-    email =  "ayush@squareops.com"
-    cpu_threshold = 60
-    mem_threshold = 70
-    disk_threshold = 50
-    db_connection_threshold = 10
-  }
-}
+# variable "path_pattern" {
+#   description = "Lists the pahs to be hide in responce"
+#   type = list(string)
+#   default = ["/members/*","/arrowchat/*","/wp-content/*"]
+# }
 
  

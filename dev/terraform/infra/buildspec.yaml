@@ -9,8 +9,7 @@ phases:
     commands:
     # Secret Manager
       - echo Get Environment variables from AWS SECRETS MANAGER
-      - aws secretsmanager get-secret-value --secret-id /stg/wp-config.php | jq -r .SecretString > wp-config.php
-      - aws secretsmanager get-secret-value --secret-id /apache2/htaccess | jq -r .SecretString > .htaccess
+      - aws secretsmanager get-secret-value --secret-id /dev/wp-config.php | jq -r .SecretString > wp-config.php
 artifacts:
    files:
       - '**/*'

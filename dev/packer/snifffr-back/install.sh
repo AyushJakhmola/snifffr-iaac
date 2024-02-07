@@ -41,19 +41,21 @@ sudo ./install auto
 echo "Code Deploy agent status check."
 
 # install Proxysql
-sudo wget https://github.com/sysown/proxysql/releases/download/v2.5.1/proxysql_2.5.1-ubuntu20_amd64.deb
-sudo apt install ./proxysql_2.5.1-ubuntu20_amd64.deb
+sudo wget -O - 'https://repo.proxysql.com/ProxySQL/proxysql-2.5.x/repo_pub_key' | sudo apt-key add -
+sudo echo "deb https://repo.proxysql.com/ProxySQL/proxysql-2.5.x/$(lsb_release -sc)/ ./" | sudo tee /etc/apt/sources.list.d/proxysql.list
+sudo apt update
+sudo apt-get install proxysql -y
 echo "Proxysql server installed successfully."
 
-# certificate configuration
-sudo mkdir /etc/letsencrypt/live/
-sudo mkdir /etc/letsencrypt/live/stg.snifffr.com
-sudo touch /etc/letsencrypt/live/stg.snifffr.com/cert.pem
-sudo touch /etc/letsencrypt/live/stg.snifffr.com/chain.pem
-sudo touch /etc/letsencrypt/live/stg.snifffr.com/fullchain.pem
-sudo touch /etc/letsencrypt/live/stg.snifffr.com/privkey.pem
-ls -al /etc/letsencrypt/live
-ls -al /etc/letsencrypt/live/stg.snifffr.com/
+
+# install objective FS
+# sudo wget https://objectivefs.com/user/download/al6v562ir/objectivefs_7.1_amd64.deb
+# sudo dpkg -i objectivefs_7.1_amd64.deb
+# echo "ObjectiveFS installed successfully."
+
+# objective FS configuration
+sudo mkdir ~/efs-mount-point 
+
 
 sudo a2dismod php7.4
 sudo a2dismod mpm_worker
@@ -64,15 +66,6 @@ sudo a2enmod access_compat actions alias auth_basic authn_core authn_file authz_
 sudo systemctl restart apache2
 apachectl -M
 
-sudo mkdir /root/efs-mount-point  
-sudo mkdir /var/log/proxysql
-sudo mkdir /var/cache/opcache
-sudo touch /var/log/proxysql/proxysql.log 
-sudo chmod 777 -R /var/log/proxysql/
-sudo chmod 777 -R /var/cache/opcache
-sudo ulimit -n 102400
-sudo ulimit -c 1073741824
+sudo mkdir /usr/local/server-scripts/
 
 echo "script executed successfully"
-
-

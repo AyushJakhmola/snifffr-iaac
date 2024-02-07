@@ -8,13 +8,12 @@ packer {
 }
 
 source "amazon-ebs" "basic-ami" {
-  ami_name             = "stg-snifffr-app-{{timestamp}}"
+  ami_name             = "dev-snifffr-app-{{timestamp}}"
   instance_type        = var.Server_cofig.instance_type
   ssh_interface         = "public_ip"
   ssh_username         = "ubuntu"
   source_ami           = var.Server_cofig.source_ami
   region               = var.region
-  encrypt_boot         = true
   # ssh_agent_auth       = true
   # ssh_keypair_name     = "sniff-2022.pem"
   # ssh_private_key_file = "/home/ubuntu/sniff-2022.pem"
@@ -30,7 +29,6 @@ build {
   }
 
 # apache configuration file
-
   provisioner "file" {
     source      = "apache.conf"
     destination = "/tmp/apache.conf"
@@ -57,7 +55,7 @@ build {
   }
   
   provisioner "shell" {
-    inline = ["sudo mv /tmp/cert.pem /etc/letsencrypt/live/stg.snifffr.com/cert.pem"]
+    inline = ["sudo mv /tmp/cert.pem /etc/letsencrypt/live/dev.snifffr.com/cert.pem"]
   }
 
   provisioner "file" {
@@ -66,7 +64,7 @@ build {
   }
   
   provisioner "shell" {
-    inline = ["sudo mv /tmp/chain.pem /etc/letsencrypt/live/stg.snifffr.com/chain.pem"]
+    inline = ["sudo mv /tmp/chain.pem /etc/letsencrypt/live/dev.snifffr.com/chain.pem"]
   }
 
   provisioner "file" {
@@ -75,7 +73,7 @@ build {
   }
   
   provisioner "shell" {
-    inline = ["sudo mv /tmp/fullchain.pem /etc/letsencrypt/live/stg.snifffr.com/fullchain.pem"]
+    inline = ["sudo mv /tmp/fullchain.pem /etc/letsencrypt/live/dev.snifffr.com/fullchain.pem"]
   }
 
     provisioner "file" {
@@ -84,7 +82,7 @@ build {
   }
   
   provisioner "shell" {
-    inline = ["sudo mv /tmp/privkey.pem /etc/letsencrypt/live/stg.snifffr.com/privkey.pem"]
+    inline = ["sudo mv /tmp/privkey.pem /etc/letsencrypt/live/dev.snifffr.com/privkey.pem"]
   }
 
 # proxysql configuration 
@@ -106,22 +104,13 @@ build {
     inline = ["sudo mv /tmp/proxysql /etc/logrotate.d/proxysql"]
   }
 
-    provisioner "file" {
+  provisioner "file" {
     source      = "fcgid.conf"
     destination = "/tmp/fcgid.conf"
   }
   
   provisioner "shell" {
     inline = ["sudo mv /tmp/fcgid.conf /etc/apache2/mods-enabled/fcgid.conf"]
-  }
-
-  provisioner "file" {
-    source      = "php.ini"
-    destination = "/tmp/php.ini"
-  }
-  
-  provisioner "shell" {
-    inline = ["sudo mv /tmp/php.ini  /etc/php/7.4/fpm/php.ini"]
   }
 
 }

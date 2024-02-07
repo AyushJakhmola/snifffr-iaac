@@ -104,21 +104,21 @@ resource "aws_cloudwatch_dashboard" "main" {
           "region" : "${local.region}"
         }
       },
-        {
-            "type": "metric",
-            "x": 12,
-            "y": 6,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "view": "timeSeries",
-                "stacked": false,
-                "metrics": [
-                    [ "AWS/ApplicationELB", "RequestCount", "LoadBalancer", "${module.alb.arn_suffix}" ]
-                ],
-                "region": "${local.region}"
-            }
-        },
+      {
+        "type" : "metric",
+        "x" : 12,
+        "y" : 6,
+        "width" : 6,
+        "height" : 6,
+        "properties" : {
+          "view" : "timeSeries",
+          "stacked" : false,
+          "metrics" : [
+            ["AWS/ApplicationELB", "RequestCount", "LoadBalancer", "${module.alb.arn_suffix}"]
+          ],
+          "region" : "${local.region}"
+        }
+      },
       {
         "type" : "metric",
         "x" : 18,
@@ -179,7 +179,7 @@ resource "aws_cloudwatch_dashboard" "main" {
           "metrics" : [
             ["AWS/RDS", "DiskQueueDepth", "DBClusterIdentifier", "${format("%s-%s-db", local.environment, local.name)}", { "period" : 60 }]
           ],
-          "region" : "${local.region}"  
+          "region" : "${local.region}"
         }
       },
       {
@@ -203,94 +203,78 @@ resource "aws_cloudwatch_dashboard" "main" {
         }
       },
       {
-            "type": "metric",
-            "x": 0,
-            "y": 18,
-            "width": 6,
-            "height": 5,
-            "properties": {
-                "view": "singleValue",
-                "stacked": false,
-                "metrics": [
-                    [ "AWS/EFS", "StorageBytes", "StorageClass", "Total", "FileSystemId", "${module.efs.id}" ]
-                ],
-                "region": "${local.region}"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 6,
-            "y": 18,
-            "width": 6,
-            "height": 4,
-            "properties": {
-                "view": "singleValue",
-                "stacked": false,
-                "metrics": [
-                    [ "AWS/EFS", "ClientConnections", "FileSystemId", "${module.efs.id}" ]
-                ],
-                "region": "${local.region}"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 12,
-            "y": 12,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "view": "timeSeries",
-                "stacked": false,
-                "metrics": [
-                    [ "AWS/EFS", "PermittedThroughput", "FileSystemId", "${module.efs.id}" ],
-                    [ ".", "PercentIOLimit", ".", "." ],
-                    [ ".", "TotalIOBytes", ".", "." ]
-                ],
-                "region": "${local.region}"
-            }
-        },
-                {
-            "type": "log",
-            "x": 0,
-            "y": 23,
-            "width": 24,
-            "height": 6,
-            "properties": {
-                "query": "SOURCE '/aws/${local.environment}/apache/error.log' | fields @timestamp, @message, @logStream, @log\n| sort @timestamp desc\n| limit 20",
-                "region": "${local.region}",
-                "title": "Log group: /aws/${local.environment}/apache/error.log",
-                "view": "table"
-            }
-        },
-        {
-            "type": "log",
-            "x": 0,
-            "y": 29,
-            "width": 24,
-            "height": 6,
-            "properties": {
-                "query": "SOURCE '/aws/${local.environment}/apache/access.log' | fields @timestamp, @message, @logStream, @log\n| sort @timestamp desc\n| limit 20",
-                "region": "${local.region}",
-                "stacked": false,
-                "view": "table"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 0,
-            "y": 36,
-            "width": 12,
-            "height": 3,
-            "properties": {
-                "view": "singleValue",
-                "stacked": false,
-                "metrics": [
-                    [ "AWS/Route53", "HealthCheckPercentageHealthy", "HealthCheckId", "${aws_route53_health_check.site_url.id}" ],
-                    [ ".", "HealthCheckStatus", ".", "." ]
-                ],
-                "region": "${local.region}"
-            }
+        "type" : "metric",
+        "x" : 0,
+        "y" : 18,
+        "width" : 6,
+        "height" : 5,
+        "properties" : {
+          "view" : "singleValue",
+          "stacked" : false,
+          "metrics" : [
+            ["AWS/EFS", "StorageBytes", "StorageClass", "Total", "FileSystemId", "${module.efs.id}"]
+          ],
+          "region" : "${local.region}"
         }
+      },
+      {
+        "type" : "metric",
+        "x" : 6,
+        "y" : 18,
+        "width" : 6,
+        "height" : 4,
+        "properties" : {
+          "view" : "singleValue",
+          "stacked" : false,
+          "metrics" : [
+            ["AWS/EFS", "ClientConnections", "FileSystemId", "${module.efs.id}"]
+          ],
+          "region" : "${local.region}"
+        }
+      },
+      {
+        "type" : "metric",
+        "x" : 12,
+        "y" : 12,
+        "width" : 6,
+        "height" : 6,
+        "properties" : {
+          "view" : "timeSeries",
+          "stacked" : false,
+          "metrics" : [
+            ["AWS/EFS", "PermittedThroughput", "FileSystemId", "${module.efs.id}"],
+            [".", "PercentIOLimit", ".", "."],
+            [".", "TotalIOBytes", ".", "."]
+          ],
+          "region" : "${local.region}"
+        }
+      },
+      {
+        "type" : "log",
+        "x" : 0,
+        "y" : 23,
+        "width" : 24,
+        "height" : 6,
+        "properties" : {
+          "query" : "SOURCE '/aws/${local.environment}/apache/error.log' | fields @timestamp, @message, @logStream, @log\n| sort @timestamp desc\n| limit 20",
+          "region" : "${local.region}",
+          "title" : "Log group: /aws/${local.environment}/apache/error.log",
+          "view" : "table"
+        }
+      },
+      {
+        "type" : "log",
+        "x" : 0,
+        "y" : 29,
+        "width" : 24,
+        "height" : 6,
+        "properties" : {
+          "query" : "SOURCE '/aws/${local.environment}/apache/access.log' | fields @timestamp, @message, @logStream, @log\n| sort @timestamp desc\n| limit 20",
+          "region" : "${local.region}",
+          "stacked" : false,
+          "view" : "table"
+        }
+      }
     ]
   })
 }

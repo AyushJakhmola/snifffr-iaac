@@ -1,55 +1,3 @@
-# S3 Bucket to keep the Artifacts
-data "aws_caller_identity" "current" {}
-
-module "alb_s3_bucket" {
-  source                   = "terraform-aws-modules/s3-bucket/aws"
-  bucket        = format("%s-%s-alb-logs-bucket", local.environment, local.name)
-  force_destroy = true
-  control_object_ownership = true
-  attach_elb_log_delivery_policy        = true
-  attach_lb_log_delivery_policy         = true
-  attach_access_log_delivery_policy     = true
-  attach_deny_insecure_transport_policy = true
-  attach_require_latest_tls_policy      = true
-  access_log_delivery_policy_source_accounts = [data.aws_caller_identity.current.account_id]
-  access_log_delivery_policy_source_buckets  = ["arn:aws:s3:::${format("%s-%s-alb-logs-bucket", local.environment, local.name)}"]
-}
-
-resource "aws_iam_role" "bucket_logs" {
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "AWS": "arn:aws:iam::797873946194:root"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
-}
-
-data "aws_iam_policy_document" "logs_bucket_policy" {
-  statement {
-    principals {
-      type        = "AWS"
-      identifiers = [aws_iam_role.bucket_logs.arn]
-    }
-
-    actions = [
-      "s3:PutObject",
-    ]
-
-    resources = [
-      "arn:aws:s3:::${format("%s-%s-alb-logs-bucket", local.environment, local.name)}",
-    ]
-  }
-}
-
 # key pair to connect with appliction server
 module "key_pair" {
   source             = "squareops/keypair/aws"
@@ -122,7 +70,6 @@ module "alb" {
   vpc_id                = module.vpc.vpc_id
   subnets               = module.vpc.public_subnets
   depends_on            = [module.vpc]
-  idle_timeout          = var.app_alb_configuration.idle_timeout
   create_security_group = true
   security_group_ingress_rules = {
     all_http = {
@@ -157,10 +104,6 @@ module "alb" {
       }
     }
   }
-  access_logs = {
-    bucket = module.alb_s3_bucket.s3_bucket_id
-    prefix = "access-logs"
-  }
 }
 
 resource "aws_lb_listener" "lb_listener" {
@@ -181,25 +124,13 @@ resource "aws_lb_target_group" "app_tg" {
   port     = var.health_check_parameters.port
   vpc_id   = module.vpc.vpc_id
   protocol = var.health_check_parameters.protocol
-  load_balancing_algorithm_type = "least_outstanding_requests"
-  deregistration_delay = var.app_alb_configuration.deregistration_delay
 
   health_check {
     path     = var.health_check_parameters.path
     matcher  = var.health_check_parameters.success_code
-    timeout = var.health_check_parameters.timeout
-    interval = var.health_check_parameters.interval
+    timeout  = 10
     protocol = var.health_check_parameters.protocol
-    healthy_threshold = var.health_check_parameters.healthy_threshold
-    unhealthy_threshold = var.health_check_parameters.unhealthy_threshold
   }
-
-  stickiness {
-    type = "lb_cookie"
-    enabled = true
-    cookie_duration = 300
-  }
-  
 }
 
 # asg and launch Template for application server
@@ -214,7 +145,19 @@ module "asg" {
   enabled_metrics     = ["GroupMinSize", "GroupMaxSize", "GroupDesiredCapacity", "GroupInServiceInstances", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
   desired_capacity    = var.app_server_configuration.desired_capacity
   health_check_type   = "EC2"
-  vpc_zone_identifier = module.vpc.private_subnets
+  vpc_zone_identifier = module.vpc.public_subnets
+
+  # scaling_policies = {
+  #   cpu_utilization_policy = {
+  #     policy_type = "TargetTrackingScaling"
+  #     target_tracking_configuration = {
+  #       predefined_metric_specification = {
+  #         predefined_metric_type = "ASGAverageCPUUtilization"
+  #       }
+  #       target_value = 70.0
+  #     }
+  #   } 
+  # }
 
   # Launch template
   image_id               = var.app_server_configuration.image_id
@@ -223,13 +166,12 @@ module "asg" {
   target_group_arns      = [aws_lb_target_group.app_tg.arn]
   launch_template_name   = format("%s-%s-launch-template", local.environment, local.name)
   update_default_version = true
-  health_check_grace_period = var.app_server_configuration.health_check_grace_period
 
   # IAM role & instance profile
   create_iam_instance_profile = true
   iam_role_name               = format("%s-%s-app-role", local.environment, local.name)
   iam_role_policies = {
-    # AmazonS3FullAccess           = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+    AmazonS3FullAccess           = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
     AmazonSSMFullAccess          = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
     AmazonS3ReadOnlyAccess       = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
     SecretsManagerReadWrite      = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
@@ -239,7 +181,6 @@ module "asg" {
     CloudWatchAgentServerPolicy  = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
     AmazonElastiCacheFullAccess  = "arn:aws:iam::aws:policy/AmazonElastiCacheFullAccess"
     AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-    AmazonElasticFileSystemFullAccess = "arn:aws:iam::aws:policy/AmazonElasticFileSystemFullAccess"
   }
 
   block_device_mappings = [
@@ -252,7 +193,7 @@ module "asg" {
         encrypted             = true
         volume_size           = var.app_server_configuration.volume_size
         volume_type           = var.app_server_configuration.volume_type
-      } 
+      }
     }
   ]
 
@@ -284,7 +225,7 @@ module "asg" {
 
 resource "aws_autoscaling_policy" "cpu" {
   name                   = format("%s-%s-cpu-scaling", local.environment, local.name)
-  cooldown               = "120"
+  cooldown               = "300"
   depends_on             = [module.asg]
   policy_type            = "SimpleScaling"
   adjustment_type        = "ChangeInCapacity"
@@ -294,7 +235,7 @@ resource "aws_autoscaling_policy" "cpu" {
 
 resource "aws_autoscaling_policy" "mem" {
   name                   = format("%s-%s-mem-scaling", local.environment, local.name)
-  cooldown               = "120"
+  cooldown               = "300"
   depends_on             = [module.asg]
   policy_type            = "SimpleScaling"
   adjustment_type        = "ChangeInCapacity"
@@ -304,45 +245,13 @@ resource "aws_autoscaling_policy" "mem" {
 
 resource "aws_autoscaling_policy" "disk" {
   name                   = format("%s-%s-disk-scaling", local.environment, local.name)
-  cooldown               = "120"
+  cooldown               = "300"
   depends_on             = [module.asg]
   policy_type            = "SimpleScaling"
   adjustment_type        = "ChangeInCapacity"
   scaling_adjustment     = "1"
   autoscaling_group_name = module.asg.autoscaling_group_name
 }
-
-#################
-resource "aws_autoscaling_policy" "cpu_down" {
-  name                   = format("%s-%s-cpu-scale-down", local.environment, local.name)
-  cooldown               = "120"
-  depends_on             = [module.asg]
-  policy_type            = "SimpleScaling"
-  adjustment_type        = "ChangeInCapacity"
-  scaling_adjustment     = "-1"
-  autoscaling_group_name = module.asg.autoscaling_group_name
-}
-
-# resource "aws_autoscaling_policy" "mem_down" {
-#   name                   = format("%s-%s-mem-scale-down", local.environment, local.name)
-#   cooldown               = "120"
-#   depends_on             = [module.asg]
-#   policy_type            = "SimpleScaling"
-#   adjustment_type        = "ChangeInCapacity"
-#   scaling_adjustment     = "-1"
-#   autoscaling_group_name = module.asg.autoscaling_group_name
-# }
-
-# resource "aws_autoscaling_policy" "disk_down" {
-#   name                   = format("%s-%s-disk-scale-down", local.environment, local.name)
-#   cooldown               = "120"
-#   depends_on             = [module.asg]
-#   policy_type            = "SimpleScaling"
-#   adjustment_type        = "ChangeInCapacity"
-#   scaling_adjustment     = "-1"
-#   autoscaling_group_name = module.asg.autoscaling_group_name
-# }
-#################
 
 # asg and launch Template for backend server
 # create seperate sg 
@@ -382,14 +291,16 @@ module "back_asg" {
   create_iam_instance_profile = true
   iam_role_name               = format("%s-%s-backend-app-role", local.environment, local.name)
   iam_role_policies = {
-    # AmazonS3FullAccess           = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-    AmazonSSMFullAccess          = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
-    AmazonS3ReadOnlyAccess       = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
-    SecretsManagerReadWrite      = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
-    AmazonRDSReadOnlyAccess      = "arn:aws:iam::aws:policy/AmazonRDSReadOnlyAccess"
-    CloudWatchAgentAdminPolicy   = "arn:aws:iam::aws:policy/CloudWatchAgentAdminPolicy"
-    CloudWatchAgentServerPolicy  = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
-    AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+    AmazonS3FullAccess                = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+    AmazonSSMFullAccess               = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
+    AmazonS3ReadOnlyAccess            = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+    SecretsManagerReadWrite           = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+    AmazonRDSReadOnlyAccess           = "arn:aws:iam::aws:policy/AmazonRDSReadOnlyAccess"
+    CloudWatchAgentAdminPolicy        = "arn:aws:iam::aws:policy/CloudWatchAgentAdminPolicy"
+    CloudWatchAgentServerPolicy       = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+    AmazonElastiCacheFullAccess       = "arn:aws:iam::aws:policy/AmazonElastiCacheFullAccess"
+    AmazonSSMManagedInstanceCore      = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+    AmazonElasticFileSystemFullAccess = "arn:aws:iam::aws:policy/AmazonElasticFileSystemFullAccess"
   }
 
   block_device_mappings = [
@@ -452,7 +363,3 @@ resource "aws_autoscaling_policy" "back_disk" {
   scaling_adjustment     = "1"
   autoscaling_group_name = module.back_asg.autoscaling_group_name
 }
-
-
-
- 

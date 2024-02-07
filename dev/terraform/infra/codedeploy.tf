@@ -1,10 +1,12 @@
 resource "aws_codedeploy_app" "app" {
   compute_platform = "Server"
+  depends_on       = [aws_codebuild_project.build_application, aws_iam_role.codedeploy_role]
   name             = format("%s-%s-codedeploy-app", local.environment, local.name)
 }
 
 resource "aws_codedeploy_deployment_group" "app_deploy_group" {
   app_name              = resource.aws_codedeploy_app.app.name
+  depends_on            = [aws_codedeploy_app.app, aws_iam_role.codedeploy_role]
   deployment_group_name = format("%s-%s-app-group", local.environment, local.name)
   service_role_arn      = resource.aws_iam_role.codedeploy_role.arn
   autoscaling_groups    = [module.asg.autoscaling_group_name]
@@ -12,6 +14,7 @@ resource "aws_codedeploy_deployment_group" "app_deploy_group" {
 
 resource "aws_codedeploy_deployment_group" "back_app_deploy_group" {
   app_name              = resource.aws_codedeploy_app.app.name
+  depends_on            = [aws_codedeploy_app.app, aws_iam_role.codedeploy_role]
   deployment_group_name = format("%s-%s-back-group", local.environment, local.name)
   service_role_arn      = resource.aws_iam_role.codedeploy_role.arn
   autoscaling_groups    = [module.back_asg.autoscaling_group_name]
@@ -86,21 +89,16 @@ resource "aws_iam_role_policy" "codedeploy_policy" {
             ],
             "Resource": "*"
         },
-        {
+       {
             "Effect": "Allow",
-            "Resource": [
-                "arn:aws:s3:::${format("%s-%s-bucket", local.environment, local.name)}",
-                "arn:aws:s3:::${format("%s-%s-bucket", local.environment, local.name)}/*"
-            ],
             "Action": [
-                "s3:PutObject",
-                "s3:GetObject",
-                "s3:GetObjectVersion",
-                "s3:GetBucketAcl",
-                "s3:GetBucketLocation"
-            ]
+                "s3:*",
+                "s3-object-lambda:*"
+            ],
+            "Resource": "*"
         },
         {
+            "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": [
                 "iam:PassRole",

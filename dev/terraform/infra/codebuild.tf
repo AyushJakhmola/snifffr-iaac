@@ -13,7 +13,7 @@ module "s3_bucket" {
 # Code Build Project
 resource "aws_codebuild_project" "build_application" {
   name           = format("%s-%s-codebuild", local.environment, local.name)
-  depends_on     = [aws_iam_role.codebuild_role]
+  depends_on     = [aws_iam_role.codebuild_role, module.s3_bucket]
   service_role   = aws_iam_role.codebuild_role.arn
   build_timeout  = "300"
   source_version = var.cicd_configuration.branch_name
@@ -82,8 +82,8 @@ resource "aws_iam_role_policy" "codebuild_policy" {
         {
             "Effect": "Allow",
             "Resource": [
-                "arn:aws:logs:${local.region}:${local.acc}:log-group:/aws/codebuild/${format("%s-%s-codebuild", local.environment, local.name)}",
-                "arn:aws:logs:${local.region}:${local.acc}:log-group:/aws/codebuild/${format("%s-%s-codebuild", local.environment, local.name)}:*"
+                "arn:aws:logs:us-west-2:421320058418:log-group:/aws/codebuild/local.name",
+                "arn:aws:logs:us-west-2:421320058418:log-group:/aws/codebuild/local.name:*"
             ],
             "Action": [
                 "logs:CreateLogGroup",
@@ -94,8 +94,7 @@ resource "aws_iam_role_policy" "codebuild_policy" {
         {
             "Effect": "Allow",
             "Resource": [
-                "arn:aws:s3:::${format("%s-%s-bucket", local.environment, local.name)}",
-                "arn:aws:s3:::${format("%s-%s-bucket", local.environment, local.name)}/*"
+                "arn:aws:s3:::codepipeline-us-west-2-*"
             ],
             "Action": [
                 "s3:PutObject",
@@ -123,12 +122,39 @@ resource "aws_iam_role_policy" "codebuild_policy" {
             "Effect": "Allow",
             "Action": [
                 "secretsmanager:ListSecrets",
-                "secretsmanager:GetResourcePolicy",
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-                "secretsmanager:ListSecretVersionIds"
+                "secretsmanager:GetSecretValue"
             ],
             "Resource": "*"
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": "secretsmanager:*",
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Resource": [
+                "*"
+            ],
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Resource": [
+                "*"
+            ],
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:GetObjectVersion",
+                "s3:GetBucketAcl",
+                "s3:GetBucketLocation"
+            ]
         }
     ]
 }

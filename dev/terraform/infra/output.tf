@@ -3,7 +3,7 @@
 # # }
 
 # output "id" {
-#   value = aws_wafv2_web_acl.cloud_front_waf.id
+#   value = module
 # }
 
 # data "aws_cloudfront_cache_policy" "example" {

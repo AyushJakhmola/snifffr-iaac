@@ -1,0 +1,11 @@
+/var/lib/proxysql/proxysql.log {
+daily
+rotate 7
+missingok
+notifempty
+compress
+postrotate
+/usr/bin/mysql --login-path=logrotate -e "PROXYSQL FLUSH LOGS"
+endscript
+create 0600 root root
+}
