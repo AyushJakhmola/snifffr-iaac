@@ -53,7 +53,7 @@ variable "cicd_configuration" {
   description = "Specify the cicd configuration"
   type        = map(string)
   default = {
-    token        = "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"
+    token        = ""
     branch_name  = "develop"
     git_location = "https://github.com/snifffr-com/snifffr.com-website.git"
     repository   = "snifffr-com/snifffr.com-website"
